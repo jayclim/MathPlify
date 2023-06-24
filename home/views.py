@@ -63,7 +63,7 @@ def index(request):
                 )
                 response = completion.result
                 # remove empty lines
-                problems = [i.strip() for i in response.split('#') if len(i.strip()) > 0]
+                problems = [i.strip() for i in response.split('#') if len(i.strip()) > 3]
                 if len(problems) == 1:
                     problems = [i.strip() for i in response.split('```') if len(i.strip()) > 3]
                 for p in problems:

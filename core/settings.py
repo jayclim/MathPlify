@@ -13,6 +13,13 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os, random, string
 from pathlib import Path
 from dotenv import load_dotenv
+from django.core.files.storage import FileSystemStorage
+
+class VercelFileSystemStorage(FileSystemStorage):
+    def __init__(self, location=None, **kwargs):
+        super().__init__(location, **kwargs)
+        self.location = '/tmp'
+DEFAULT_FILE_STORAGE = 'home.storage.VercelFileSystemStorage'
 
 load_dotenv()  # take environment variables from .env.
 

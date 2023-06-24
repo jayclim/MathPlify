@@ -63,9 +63,9 @@ def index(request):
                 )
                 response = completion.result
                 # remove empty lines
-                problems = [i.strip() for i in response.split('```') if len(i.strip()) > 0]
+                problems = [i.strip() for i in response.split('#') if len(i.strip()) > 0]
                 if len(problems) == 1:
-                    problems = [i.strip() for i in response.split('#') if len(i.strip()) > 0]
+                    problems = [i.strip() for i in response.split('```') if len(i.strip()) > 3]
                 for p in problems:
                     tmp = GeneratedProblem(problem=Problem.objects.get(id=request.POST['problem_id']), generated=p.strip())
                     tmp.save()
@@ -94,4 +94,4 @@ def problems(request):
     return redirect('login')
 
 def get_prompt(text):
-    return "You are a math assistant who is helping a student create more practice problems given a LaTeX equation. The LaTeX equation is: " + text + " The student wants to create a practice problem that is similar to the original LaTeX equation that test the same ideas and concepts needed to solve the original problem. Problems should be formatted exactly the same as the original problem. All problems should have different numbers. List 10 practice problems that are similar to the original LaTeX equation and write each new problem in LaTeX format. Do not number each problem. Most importantly, seperate each problem with three backticks."
+    return "You are a math assistant who is helping a student create more practice problems given a LaTeX equation. The LaTeX equation is: " + text + " The student wants to create a practice problem that is similar to the original LaTeX equation that test the same ideas and concepts needed to solve the original problem. Problems should be formatted exactly the same as the original problem. All problems should have different numbers. List 10 practice problems that are similar to the original LaTeX equation and write each new problem in LaTeX format. Do not number each problem. Most importantly, seperate each problem with one hashtag symbol."

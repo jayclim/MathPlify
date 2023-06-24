@@ -117,22 +117,30 @@ MathPlify {% endblock title %} {% block body %} class="index-page bg-gray-200"
             })
               .then((response) => response.json())
               .then((data) => {
-                var problems = data.problems;
-                console.log(data);
-                // Add <h2 class="text-dark mb-0">Upload Math Problem</h2> to the div with id generated
-                $("#generated-title").empty();
-                $("#generated-title").append(
-                  '<h2 class="text-dark mb-0">Generated Math Problem</h2>'
-                );
-                // for each problem in the list problems, add a paragraph into the div with id generated
-                $("#generated").empty();
-                for (var i = 0; i < problems.length; i++) {
-                  $("#generated").append("<li><p>" + problems[i] + "</p></li>");
+                if(data.success) {
+                  var problems = data.problems;
+                  console.log(data);
+                  // Add <h2 class="text-dark mb-0">Upload Math Problem</h2> to the div with id generated
+                  $("#generated-title").empty();
+                  $("#generated-title").append(
+                    '<h2 class="text-dark mb-0">Generated Math Problem</h2>'
+                  );
+                  // for each problem in the list problems, add a paragraph into the div with id generated
+                  $("#generated").empty();
+                  for (var i = 0; i < problems.length; i++) {
+                    $("#generated").append("<li><p>" + problems[i] + "</p></li>");
+                  }
+                  MathJax.typeset();
                 }
-                MathJax.typeset();
+                else {
+                  console.log("error");
+                  console.log(data.error);
+                }
+                
               });
           } else {
             console.log("error");
+            console.log(data.error);
           }
         });
     });

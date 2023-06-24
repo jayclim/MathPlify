@@ -47,8 +47,8 @@ def index(request):
                     uploaded_img.latex = latex
                     uploaded_img.save()
                     return JsonResponse({'success':True, 'extracted':latex, 'problem_id': uploaded_img.id}, safe=False)
-                except:
-                    return JsonResponse({'success':False, 'extracted':""}, safe=False)
+                except Exception as e:
+                    return JsonResponse({'success':False, 'extracted':"", 'error':e}, safe=False)
             else:
                 return JsonResponse({'success':False, 'extracted':""}, safe=False)
         else:
@@ -70,7 +70,7 @@ def index(request):
                 return JsonResponse({'success':True, 'problems':problems}, safe=False)
             except Exception as e:
                 tmp = GeneratedProblem(problem=Problem.objects.get(id=request.POST['problem_id']))
-                return JsonResponse({'success':False, 'problems':""}, safe=False)
+                return JsonResponse({'success':False, 'problems':"", 'error':e}, safe=False)
 
     else:
         form = ProblemForm()

@@ -1,0 +1,465 @@
+{% extends 'layouts/base_background.html' %} {% load static %} {% block title %}
+MathPlify {% endblock title %} {% block body %} class="index-page bg-gray-200"
+{% endblock body %} {% block content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+></script>
+<style>
+  .drop-container {
+    position: relative;
+    display: flex;
+    gap: 10px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    padding: 20px;
+    border-radius: 10px;
+    border: 2px dashed #555;
+    color: #444;
+    cursor: pointer;
+    transition: background 0.2s ease-in-out, border 0.2s ease-in-out;
+  }
+
+  .drop-container:hover {
+    background: #eee;
+    border-color: #111;
+  }
+
+  .drop-container:hover .drop-title {
+    color: #222;
+  }
+
+  .drop-title {
+    color: #444;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    transition: color 0.2s ease-in-out;
+  }
+
+  input[type="file"] {
+    width: 350px;
+    max-width: 100%;
+    color: #444;
+    padding: 5px;
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #555;
+  }
+
+  input[type="file"]::file-selector-button {
+    margin-right: 20px;
+    border: none;
+    background: #ec407a;
+    padding: 10px 20px;
+    border-radius: 10px;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.2s ease-in-out;
+  }
+
+  input[type="file"]:disabled {
+    opacity: 0.65;
+  }
+
+  input[type="file"]:disabled::file-selector-button:hover {
+    background: #ec407a;
+  }
+
+  input[type="file"]::file-selector-button:hover {
+    background: #d81b60;
+  }
+</style>
+<script>
+  $(document).ready(function () {
+    // On form submit, prevent default form submission
+    $("#upload-form").on("submit", function (e) {
+      e.preventDefault();
+      // Get form data
+      var formData = new FormData();
+      // add csrf django csrf_token
+      const csrftoken = document.querySelector(
+        "[name=csrfmiddlewaretoken]"
+      ).value;
+      formData.append("csrfmiddlewaretoken", csrftoken);
+      // Add whether post image or latex
+      formData.append("isImage", "true");
+      // add image
+      formData.append("image", $("#images")[0].files[0]);
+      fetch("", {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          // Empty file input form fields
+          $("#images").val("");
+          if (data.success) {
+            var latex = data.extracted;
+            var id = data.problem_id;
+            // set the tag with id of latex to the latex variable in jquery
+            $("#latex").html(latex);
+            console.log(data);
+            MathJax.typeset();
+            var formData2 = new FormData();
+            formData2.append("csrfmiddlewaretoken", csrftoken);
+            formData.append("isImage", "false");
+            formData2.append("latex", latex);
+            formData2.append("problem_id", id);
+            fetch("", {
+              method: "POST",
+              body: formData2,
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                var problems = data.problems;
+                console.log(data);
+                // Add <h2 class="text-dark mb-0">Upload Math Problem</h2> to the div with id generated
+                $("#generated-title").empty();
+                $("#generated-title").append(
+                  '<h2 class="text-dark mb-0">Generated Math Problem</h2>'
+                );
+                // for each problem in the list problems, add a paragraph into the div with id generated
+                $("#generated").empty();
+                for (var i = 0; i < problems.length; i++) {
+                  $("#generated").append("<li><p>" + problems[i] + "</p></li>");
+                }
+                MathJax.typeset();
+              });
+          } else {
+            console.log("error");
+          }
+        });
+    });
+  });
+</script>
+<header class="header-2">
+  <div
+    class="page-header min-vh-75 relative"
+    style="background-image: url('{% static 'img/mathplify-background.jpg' %}')"
+  >
+    <span class="mask bg-gradient-primary opacity-4"></span>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-7 text-center mx-auto">
+          <h1 class="text-white pt-3 mt-n5">MathPlify</h1>
+          <p class="lead text-white mt-3">
+            Unlock the power of unlimited practice one problem at a time
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="card card-body blur shadow-blur mx-3 mx-md-4 mt-n6">
+  <section class="pt-3 pb-4" id="count-stats">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-9 mx-auto py-3">
+          <div class="row">
+            <div class="col-md-4 position-relative">
+              <div class="p-3 text-center">
+                <h1 class="text-gradient text-primary">
+                  <span id="state1" countTo="{{nums.0}}">0</span>
+                </h1>
+                <h5 class="mt-3">Students Helped</h5>
+                <p class="text-sm font-weight-normal">
+                  Easy to Use, Easy to Learn
+                </p>
+              </div>
+              <hr class="vertical dark" />
+            </div>
+            <div class="col-md-4 position-relative">
+              <div class="p-3 text-center">
+                <h1 class="text-gradient text-primary">
+                  <span id="state2" countTo="{{nums.1}}">0</span>
+                </h1>
+                <h5 class="mt-3">Problems Processed</h5>
+                <p class="text-sm font-weight-normal">
+                  Snap a Picture and Upload!
+                </p>
+              </div>
+              <hr class="vertical dark" />
+            </div>
+            <div class="col-md-4">
+              <div class="p-3 text-center">
+                <h1 class="text-gradient text-primary" id="state3" countTo="{{nums.2}}">
+                  0
+                </h1>
+                <h5 class="mt-3">Problems Generated</h5>
+                <p class="text-sm font-weight-normal">
+                  Quickly Learn and Practice
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="my-5 py-5" id="about">
+    <div class="container">
+      <div class="row">
+        <div class="row justify-content-center text-center my-sm-5">
+          <div class="col-lg-6">
+            <span class="badge bg-primary mb-3">About MathPlify</span>
+            <h2 class="text-dark mb-0">How We Run</h2>
+            <p class="lead">
+              MathPlify is a free online math problem generator
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <section>
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-lg-4 ms-auto me-auto p-lg-4 mt-lg-0 mt-4 mb-5">
+            <div class="rotating-card-container">
+              <div
+                class="card card-rotate card-background card-background-mask-primary shadow-primary mt-md-0 mt-5"
+              >
+                <div
+                  class="front front-background"
+                  style="
+                    background-image: url(https://images.unsplash.com/photo-1569683795645-b62e50fbf103?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=987&q=80);
+                    background-size: cover;
+                  "
+                >
+                  <div class="card-body py-7 text-center">
+                    <i class="material-icons text-white text-4xl my-3"
+                      >touch_app</i
+                    >
+                    <h3 class="text-white">
+                      Why <br />
+                      MathPlify
+                    </h3>
+                    <p class="text-white opacity-8">
+                      Generate unlimited problems to have unlimited practice.
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="back back-background"
+                  style="
+                    background-image: url(https://images.unsplash.com/photo-1498889444388-e67ea62c464b?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1365&q=80);
+                    background-size: cover;
+                  "
+                >
+                  <div class="card-body pt-7 text-center">
+                    <h3 class="text-white">Practice Makes Perfect</h3>
+                    <p class="text-white opacity-8">
+                      MathPlify makes it easy to upload any picture of a math
+                      problem and generate more practice problems with solutions
+                    </p>
+                    <a
+                      href="{% url 'page_header' %}"
+                      target="_blank"
+                      class="btn btn-white btn-sm w-50 mx-auto mt-3"
+                      >Try Now!</a
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6 ms-auto">
+            <div class="row justify-content-start">
+              <div class="col-md-6">
+                <div class="info">
+                  <i class="material-icons text-gradient text-primary text-3xl"
+                    >content_copy</i
+                  >
+                  <h5 class="font-weight-bolder mt-3">Any Math Problem</h5>
+                  <p class="pe-5">
+                    No matter it'd be a algebra word problem or a trigometric
+                    problem, we've got it covered.
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="info">
+                  <i class="material-icons text-gradient text-primary text-3xl"
+                    >flip_to_front</i
+                  >
+                  <h5 class="font-weight-bolder mt-3">Challenging Problems</h5>
+                  <p class="pe-3">
+                    We use artificial intelligence to generate different
+                    problems. Some with different formats, and others with
+                    different numbers. But no matter what, every problem will
+                    test the same concept.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="row justify-content-start mt-5">
+              <div class="col-md-6 mt-3">
+                <i class="material-icons text-gradient text-primary text-3xl"
+                  >price_change</i
+                >
+                <h5 class="font-weight-bolder mt-3">Save Time & Money</h5>
+                <p class="pe-5">
+                  No more scrambling for textbooks and problems. You can find it
+                  all here, for free!
+                </p>
+              </div>
+              <div class="col-md-6 mt-3">
+                <div class="info">
+                  <i class="material-icons text-gradient text-primary text-3xl"
+                    >devices</i
+                  >
+                  <h5 class="font-weight-bolder mt-3">Reliable</h5>
+                  <p class="pe-3">
+                    Regardless of the problem, our system will always generate
+                    multiple problems. If there are any problems, please let us
+                    know!
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <div class="container py-5" id="upload">
+      <div class="row">
+        <div class="row justify-content-center text-center my-sm-5">
+          <div class="col-lg-6">
+            <span class="badge bg-primary mb-3">Problem Generator</span>
+            <h2 class="text-dark mb-0">Upload Math Problem</h2>
+            <p class="lead">
+              Ensure the only text in the image is the math problem.<br />Only
+              .jpg and .png files are accepted.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% if user.is_authenticated %}
+    <div class="container">
+      <div class="row">
+        <div class="row justify-content-center text-center my-sm-5">
+          <form method="post" enctype="multipart/form-data" id="upload-form">
+            <label for="images" class="drop-container">
+              {% csrf_token %}
+              <span class="drop-title">Drop files here</span>
+              or {{ form.image }} {% comment %}
+              <input
+                type="file"
+                id="images"
+                accept="image/png, image/jpg, image/jpeg"
+                required
+              />
+              {% endcomment %}
+            </label>
+            <button type="submit" class="btn bg-gradient-primary">
+              Upload
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="container">
+      <div class="row">
+        <div class="row justify-content-center text-center my-sm-5">
+          <form method="post" enctype="multipart/form-data" id="upload-form">
+            <label for="images" class="drop-container">
+              {% csrf_token %}
+              <span class="drop-title">Sign In to Upload</span>
+              {% comment %} or {% endcomment %}
+              <input
+                type="file"
+                id="images"
+                accept="image/png, image/jpg, image/jpeg"
+                disabled
+              />
+              {% comment %} {{ form.image }} {% endcomment %} {% comment %}
+              <input
+                type="file"
+                id="images"
+                accept="image/png, image/jpg, image/jpeg"
+                required
+              />
+              {% endcomment %}
+            </label>
+            <button type="submit" class="btn bg-gradient-primary" disabled>
+              Upload
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    <div class="container">
+      <div class="row">
+        <div class="row justify-content-center text-center my-sm-5">
+          <div class="col-lg-6">
+            <p class="lead" id="latex"></p>
+            <div id="generated-title"></div>
+            <ol id="generated" style="margin-top: 50px"></ol>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% endblock content %} {% block javascripts %}
+
+    <!--  Plugin for TypedJS, full documentation here: https://github.com/inorganik/CountUp.js -->
+    <script src="{% static 'js/plugins/countup.min.js' %}"></script>
+    <script src="{% static 'js/plugins/choices.min.js' %}"></script>
+    <script src="{% static 'js/plugins/prism.min.js' %}"></script>
+    <script src="{% static 'js/plugins/highlight.min.js' %}"></script>
+    <!--  Plugin for Parallax, full documentation here: https://github.com/dixonandmoe/rellax -->
+    <script src="{% static 'js/plugins/rellax.min.js' %}"></script>
+    <!--  Plugin for TiltJS, full documentation here: https://gijsroge.github.io/tilt.js/ -->
+    <script src="{% static 'js/plugins/tilt.min.js' %}"></script>
+    <!--  Plugin for Selectpicker - ChoicesJS, full documentation here: https://github.com/jshjohnson/Choices -->
+    <script src="{% static 'js/plugins/choices.min.js' %}"></script>
+
+    <script type="text/javascript">
+      if (document.getElementById("state1")) {
+        const countUp = new CountUp(
+          "state1",
+          document.getElementById("state1").getAttribute("countTo")
+        );
+        if (!countUp.error) {
+          countUp.start();
+        } else {
+          console.error(countUp.error);
+        }
+      }
+      if (document.getElementById("state2")) {
+        const countUp1 = new CountUp(
+          "state2",
+          document.getElementById("state2").getAttribute("countTo")
+        );
+        if (!countUp1.error) {
+          countUp1.start();
+        } else {
+          console.error(countUp1.error);
+        }
+      }
+      if (document.getElementById("state3")) {
+        const countUp2 = new CountUp(
+          "state3",
+          document.getElementById("state3").getAttribute("countTo")
+        );
+        if (!countUp2.error) {
+          countUp2.start();
+        } else {
+          console.error(countUp2.error);
+        }
+      }
+    </script>
+
+    {% endblock javascripts %}
+  </section>
+</div>

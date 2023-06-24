@@ -30,7 +30,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 DEBUG = False
 
 # Docker HOST
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '.vercel.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '.vercel.app']
 
 # Add here your deployment HOSTS
 # CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://localhost:5085', 'http://127.0.0.1:8000', 'http://127.0.0.1:5085', '.vercel.com']

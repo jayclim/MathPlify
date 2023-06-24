@@ -64,6 +64,8 @@ def index(request):
                 response = completion.result
                 # remove empty lines
                 problems = [i.strip() for i in response.split('```') if len(i.strip()) > 0]
+                if len(problems) == 1:
+                    problems = [i.strip() for i in response.split('#') if len(i.strip()) > 0]
                 for p in problems:
                     tmp = GeneratedProblem(problem=Problem.objects.get(id=request.POST['problem_id']), generated=p.strip())
                     tmp.save()

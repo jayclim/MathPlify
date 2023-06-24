@@ -19,7 +19,7 @@ class VercelFileSystemStorage(FileSystemStorage):
     def __init__(self, location=None, **kwargs):
         super().__init__(location, **kwargs)
         self.location = '/tmp'
-DEFAULT_FILE_STORAGE = 'home.storage.VercelFileSystemStorage'
+DEFAULT_FILE_STORAGE = 'core.storage.VercelFileSystemStorage'
 
 load_dotenv()  # take environment variables from .env.
 

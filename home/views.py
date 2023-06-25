@@ -89,7 +89,7 @@ def problems(request):
         #     tmp.append((problem, problem.generated_problems))
             
         return render(request, 'pages/problems.html', {
-            'problems': Problem.objects.all(),
+            'problems': User.chosen_problems.all(),
         })
     return redirect('login')
 

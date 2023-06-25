@@ -14,7 +14,7 @@ import os, random, string
 from pathlib import Path
 from dotenv import load_dotenv
 
-DEFAULT_FILE_STORAGE = 'core.storage.VercelFileSystemStorage'
+# DEFAULT_FILE_STORAGE = 'core.storage.VercelFileSystemStorage'
 
 load_dotenv()  # take environment variables from .env.
 

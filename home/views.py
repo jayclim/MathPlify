@@ -7,13 +7,10 @@ import json
 import google.generativeai as palm
 from dotenv import load_dotenv
 import os
+import openai
 load_dotenv()
+openai.api_key = os.environ.get('OPENAI_KEY')
 palm.configure(api_key=os.environ.get('PALM_API'))
-
-# text = "\text { Find the inverse of } f(x)=\frac{8-7 x}{6}"
-# prompt = "You are a math assistant who is helping a student create more practice problems given a word problem. The word problem is: " + text + " The student wants to create a practice problem that is similar to the word problem that test the same ideas and concepts needed to solve the original problem. List 10 practice problems that are similar to the word problem and write them in a python list format."
-
-
 
 
 # Create your views here.
@@ -54,20 +51,34 @@ def index(request):
         else:
             try:
                 latex = repr(request.POST.get('latex'))
-                completion = palm.generate_text(
-                    model="models/text-bison-001",
-                    prompt=get_prompt(latex),
-                    temperature=0,
-                    # The maximum length of the response
-                    # max_output_tokens=2000,
+                # completion = palm.generate_text(
+                #     model="models/text-bison-001",
+                #     prompt=get_prompt(latex),
+                #     temperature=0,
+                #     # The maximum length of the response
+                #     # max_output_tokens=2000,
+                # )
+                # response = completion.result
+                comp = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",  # You can adjust the engine according to your needs
+                    messages=[
+                        {"role": "system", "content": "You are a helpful asistant."},
+                        {"role": "user", "content": get_prompt(latex)},
+                    ],
+                    max_tokens=500,
+                    temperature=0.2,
+                    n=1,  # Number of sentences to identify for claim, evidence, and reasoning
+                    stop=None,
                 )
-                response = completion.result
+                response = comp["choices"][0]["message"]["content"]
                 response = response.replace('\\\\', '\\')
+                print(response)
                 # remove empty lines
                 # problems = [i.strip() for i in response.split('#') if len(i.strip()) > 3]
                 # if len(problems) == 1:
                 #     problems = [i.strip() for i in response.split('```') if len(i.strip()) > 3]
-                problems = [ i.strip() for i in response.split("|")[8::3]]
+                # problems = [ i.strip() for i in response.split("|")[8::3]]
+                problems = [i.strip()[2:] for i in response.split("\n") if "- " in i]
                 for p in problems:
                     tmp = GeneratedProblem(problem=Problem.objects.get(id=request.POST['problem_id']), generated=p.strip())
                     tmp.save()
@@ -95,4 +106,5 @@ def problems(request):
     return redirect('login')
 
 def get_prompt(text):
-    return "You are a math assistant who is helping a student create more practice problems given a LaTeX equation. The LaTeX equation is: " + text + ". The student wants to create a practice problem that is similar to the LaTeX equation that test the same ideas and concepts needed to solve the original problem. All problems should have different numbers and all problems should be formmated exactly the same way as the original problem was. Use 1 dollar symbol for math delimiters. List 10 practice problems that are similar to the LaTeX equation and write each new problem in LaTeX format. List all problems in a table format."
+    # return "You are a math assistant who is helping a student create more practice problems given a LaTeX equation. The LaTeX equation is: " + text + ". The student wants to create a practice problem that is similar to the LaTeX equation that test the same ideas and concepts needed to solve the original problem. All problems should have different numbers and all problems should be formmated exactly the same way as the original problem was. Use 1 dollar symbol for math delimiters. List 10 practice problems that are similar to the LaTeX equation and write each new problem in LaTeX format. List all problems in a table format."
+    return "You are a math assistant who is helping a student create more practice problems given a LaTeX equation. The LaTeX equation is: " + text + ". The student wants to create a practice problem that is similar to the LaTeX equation that test the same ideas and concepts needed to solve the original problem. All problems should have different numbers and problems should have varying levels of difficulty and formats. Use 1 dollar symbol for math delimiters. List 10 practice problems that are similar to the LaTeX equation and write each new problem in LaTeX format. List all problems in bullet point format."

@@ -31,7 +31,7 @@ def index(request):
                         files={"file": uploaded_img.image_data},
                         data={
                         "options_json": json.dumps({
-                            "math_inline_delimiters": ["\\(", "\\)"],
+                            "math_inline_delimiters": ["$", "$"],
                             "rm_spaces": True,
                             "formats": ["text", "data", "html"],
                             
@@ -62,10 +62,12 @@ def index(request):
                     # max_output_tokens=2000,
                 )
                 response = completion.result
+                response = response.replace('\\\\', '\\')
                 # remove empty lines
-                problems = [i.strip() for i in response.split('#') if len(i.strip()) > 3]
-                if len(problems) == 1:
-                    problems = [i.strip() for i in response.split('```') if len(i.strip()) > 3]
+                # problems = [i.strip() for i in response.split('#') if len(i.strip()) > 3]
+                # if len(problems) == 1:
+                #     problems = [i.strip() for i in response.split('```') if len(i.strip()) > 3]
+                problems = [ i.strip() for i in response.split("|")[8::3]]
                 for p in problems:
                     tmp = GeneratedProblem(problem=Problem.objects.get(id=request.POST['problem_id']), generated=p.strip())
                     tmp.save()
@@ -87,11 +89,10 @@ def problems(request):
         # tmp = []
         # for problem in Problem.objects.all():
         #     tmp.append((problem, problem.generated_problems))
-            
         return render(request, 'pages/problems.html', {
-            'problems': User.chosen_problems.all(),
+            'problems': Problem.objects.filter(user=request.user),
         })
     return redirect('login')
 
 def get_prompt(text):
-    return "You are a math assistant who is helping a student create more practice problems given a LaTeX equation. The LaTeX equation is: " + text + " The student wants to create a practice problem that is similar to the original LaTeX equation that test the same ideas and concepts needed to solve the original problem. Problems should be formatted exactly the same as the original problem. All problems should have different numbers. List 10 practice problems that are similar to the original LaTeX equation and write each new problem in LaTeX format. Do not number each problem. Most importantly, seperate each problem with one hashtag symbol."
+    return "You are a math assistant who is helping a student create more practice problems given a LaTeX equation. The LaTeX equation is: " + text + ". The student wants to create a practice problem that is similar to the LaTeX equation that test the same ideas and concepts needed to solve the original problem. All problems should have different numbers and all problems should be formmated exactly the same way as the original problem was. Use 1 dollar symbol for math delimiters. List 10 practice problems that are similar to the LaTeX equation and write each new problem in LaTeX format. List all problems in a table format."

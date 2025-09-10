@@ -16,5 +16,3 @@ Getting the project done and mostly functioning :D. I thankfully encountered the
 ## What's next for MathPlify
 Creating mobile apps powered by the same structure is probably the most important next step as it's much easier for students to snap a picture on their phone and upload/crop images locally. Improving the model's accuracy is also important as well since very complex problems can be quite tricky to generate more problems. Finally, after the product is polished, providing schools with this new tool can allow students to have unlimited practice so no one will have to be in the same situation as my friend.
 
-#### Info
-I am Jayden Lim, and I live in California, USA. You can contact me through my email sqwatato@gmail.com.
